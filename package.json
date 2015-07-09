@@ -1,0 +1,25 @@
+{
+  "name": "AngularWorkshop",
+  "version": "0.0.1",
+  "description": "For educational porpoises",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/darxx/AngularWorkshop.git"
+  },
+  "author": "Darius Laurinčikas <darx21@gmail.com>",
+  "dependencies": {
+    "gulp": "^3.9.0",
+    "gulp-bower": "0.0.10",
+    "run-sequence": "^1.1.1"
+  },
+  "devDependencies": {
+    "connect": "^3.4.0",
+    "connect-history-api-fallback": "^1.1.0",
+    "gulp": "^3.9.0",
+    "gulp-bower": "0.0.10",
+    "http": "0.0.0",
+    "opn": "^3.0.2",
+    "serve-index": "^1.7.1",
+    "serve-static": "^1.10.0"
+  }
+}
