@@ -17,6 +17,7 @@ Workshop agenda:
             3.2 Create service
             3.3 Create directive
             3.4 Create filter
+            3.5 Create angular routing
             
     Step 4: Karma
             4.1 Karma installation
