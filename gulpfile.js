@@ -2,7 +2,10 @@ var gulp = require('gulp'),
     runSeq = require('run-sequence'),
     bower = require('gulp-bower');
 
-//server module
+var eslint = require('gulp-eslint'),
+    plato = require('gulp-plato');
+
+//server modules
 var opn = require('opn'),
     connect = require('connect'),
     serveStatic = require('serve-static'),
@@ -11,7 +14,12 @@ var opn = require('opn'),
     history = require('connect-history-api-fallback');
 
 var config = {
-    buildDir: './app/',
+    ui: {
+        js: [
+            './src/js/**/*.js'
+        ]
+    },
+    buildDir: './src/',
     port: '8888'
 };
 
@@ -34,8 +42,61 @@ gulp.task( 'connect', function() {
         } );
 } );
 
-gulp.task('default', function() {
-    return runSeq('bower', 'clean-all', ['copy-fonts', 'build-index', 'copy-images', 'copy-webworkers'], 'watch', 'karma');
+
+gulp.task('lint', function () {
+    return gulp.src(config.ui.js)
+        .pipe(eslint({
+            "rules":{
+                'camelcase': 1,
+                'no-comma-dangle': 2,
+                'quotes': 0,
+                'strict': 0,
+                'no-use-before-define': 0,
+                'global-strict': [2, 'always'],
+                "no-unused-vars": [0, {
+                    "vars": "all",
+                    "args": "after-used"
+                }]
+            },
+            globals: {
+                'angular': true,
+                '$':true,
+                document: true,
+                window: true
+            },
+            useEslintrc: true
+        }))
+        .pipe(eslint.format())
+        .pipe(eslint.failOnError());
 });
 
-gulp.task('default',['connect']);
+gulp.task('plato', function () {
+    return gulp.src(config.ui.js)
+        .pipe(plato('report', {
+            jshint: {
+                options: {
+                    node: true,
+                    strict: true,
+                    sub: true,
+                    predef: ['angular']
+                }
+            },
+            complexity: {
+                trycatch: true
+            }
+        }));
+});
+
+gulp.task( 'watch', function() {
+    gulp.watch(
+        [
+            config.ui.js[0]
+        ],
+        ['lint']
+    );
+
+});
+
+gulp.task('default', function() {
+    return runSeq('connect', 'lint', 'watch');
+});
