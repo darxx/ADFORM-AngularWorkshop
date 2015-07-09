@@ -5,6 +5,6 @@ angular.module('darius')
 function myNameDirective () {
     return {
         restrict: 'E',
-        template: 'Hi mane name is <strong>{{main.name}}</strong>'
+        template: 'Hi name is <strong>{{main.name}}</strong>'
     };
 }

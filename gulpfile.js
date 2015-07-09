@@ -14,13 +14,31 @@ var opn = require('opn'),
     http = require('http'),
     history = require('connect-history-api-fallback');
 
+var usemin = require('gulp-usemin'),
+    minifyCss = require('gulp-minify-css'),
+    minifyHtml = require('gulp-minify-html'),
+    uglify = require('gulp-uglify'),
+    sourcemaps = require('gulp-sourcemaps'),
+    ngAnnotate = require('gulp-ng-annotate'),
+    concat = require('gulp-concat'),
+    del = require('del'),
+    reporter = require('gulp-eslint-teamcity-formatter');
+
 var config = {
     ui: {
         js: [
             './src/js/**/*.js'
-        ]
+        ],
+        templates: [
+            './src/js/app/**/*.html',
+            '!./src/index.html'
+        ],
+        index: './src/index.html',
+        maps: './maps/',
+        appMinName: 'app.min.js'
     },
-    buildDir: './src/',
+    favIcon: './src/favicon.ico',
+    buildDir: './build/',
     port: '8888'
 };
 
@@ -71,6 +89,34 @@ gulp.task('lint', function () {
         .pipe(eslint.failOnError());
 });
 
+gulp.task('lintTC', function () {
+    return gulp.src(config.ui.js)
+        .pipe(eslint({
+            "rules":{
+                'camelcase': 1,
+                'no-comma-dangle': 2,
+                'quotes': 0,
+                'strict': 0,
+                'no-use-before-define': 0,
+                'global-strict': [2, 'always'],
+                "no-unused-vars": [0, {
+                    "vars": "all",
+                    "args": "after-used"
+                }]
+            },
+            globals: {
+                'jQuery':false,
+                'angular': true,
+                '$':true,
+                document: true,
+                window: true
+            },
+            useEslintrc: true
+        }))
+        .pipe(eslint.format(reporter))
+        .pipe(eslint.failOnError());
+});
+
 gulp.task('plato', function () {
     return gulp.src(config.ui.js)
         .pipe(plato('report', {
@@ -96,6 +142,13 @@ gulp.task('test', function(done) {
 
 });
 
+gulp.task('testBuild', function(done) {
+    karma.start({
+        configFile:  __dirname + '/karma.conf.js',
+        singleRun: true
+    }, done);
+});
+
 gulp.task('watch', function() {
     gulp.watch(
         [
@@ -104,8 +157,74 @@ gulp.task('watch', function() {
         ['lint']
     );
 
+    gulp.watch(
+        [
+            config.ui.templates
+        ],
+        [ 'compileSoft', 'templates' ]
+    );
+
 });
 
+gulp.task('compileSoft',['app-js'], function () {
+    return gulp.src(config.ui.index)
+        .pipe(usemin({
+            css: [minifyCss(), 'concat'],
+            inlinejs: [uglify()],
+            inlinecss: [minifyCss(), 'concat']
+        }))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('compileHard', ['app-js'], function () {
+    return gulp.src(config.ui.index)
+        .pipe(usemin({
+            css: [minifyCss(), 'concat'],
+            html: [minifyHtml({empty: true})],
+            inlinejs: [uglify()],
+            inlinecss: [minifyCss(), 'concat']
+        }))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('app-js', function () {
+    gulp.src(config.ui.js)
+        .pipe(sourcemaps.init())
+        .pipe(ngAnnotate({
+            remove: true,
+            add: true,
+            single_quotes: true,
+            dynamic: true
+        }))
+        .pipe(concat(config.ui.appMinName))
+        .pipe(uglify())
+        .pipe(sourcemaps.write(config.ui.maps, {
+            includeContent: true
+        }))
+        .pipe(gulp.dest(config.buildDir+'/js/app/'))
+});
+
+gulp.task('templates',['mv-files'], function () {
+
+    return gulp.src(config.ui.templates)
+        .pipe(gulp.dest(config.buildDir+'/js/app/'));
+
+});
+gulp.task('mv-files',function () {
+    return gulp.src(config.favIcon)
+        .pipe(gulp.dest(config.buildDir));
+});
+
+
+gulp.task('clean', function(cb) {
+    del(['./build/*', './coverage/*', './report/*'], cb);
+});
+
+gulp.task('production', function() {
+    return runSeq('clean','compileHard','templates', 'lintTC', 'plato', 'testBuild');
+});
+
+
 gulp.task('default',['watch'], function() {
-    return runSeq('connect', 'lint', 'test');
+    return runSeq('clean','compileSoft','templates','connect', 'lint', 'test');
 });
