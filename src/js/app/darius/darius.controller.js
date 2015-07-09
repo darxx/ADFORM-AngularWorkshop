@@ -5,14 +5,20 @@ angular.module('darius')
 
 function mainCtrl(profile, $timeout) {
     var that = this;
-    that.name = 'ConnectingToServer...';
+    that.name = 'Connecting To Server...';
 
     $timeout(function(){
-        that.name = 'StillLoading...';
+        that.name = 'Still Loading...';
     }, 5000);
 
-    profile.getInfo().then(function(info){
-        that.name = info.name;
-    });
+    this.init = function () {
+
+        profile.getInfo().then(function(info){
+            that.name = info.name;
+        });
+    };
+
+    this.init();
+
 
 }
