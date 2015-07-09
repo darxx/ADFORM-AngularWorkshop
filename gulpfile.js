@@ -3,7 +3,8 @@ var gulp = require('gulp'),
     bower = require('gulp-bower');
 
 var eslint = require('gulp-eslint'),
-    plato = require('gulp-plato');
+    plato = require('gulp-plato'),
+    karma = require('karma').server;
 
 //server modules
 var opn = require('opn'),
@@ -87,7 +88,15 @@ gulp.task('plato', function () {
         }));
 });
 
-gulp.task( 'watch', function() {
+gulp.task('test', function(done) {
+    karma.start({
+        configFile:  __dirname + '/karma.conf.js',
+        singleRun: false
+    }, done);
+
+});
+
+gulp.task('watch', function() {
     gulp.watch(
         [
             config.ui.js[0]
@@ -98,5 +107,5 @@ gulp.task( 'watch', function() {
 });
 
 gulp.task('default',['watch'], function() {
-    return runSeq('connect', 'lint');
+    return runSeq('connect', 'lint', 'test');
 });

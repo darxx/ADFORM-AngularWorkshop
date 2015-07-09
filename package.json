@@ -12,6 +12,15 @@
     "gulp-bower": "0.0.10",
     "gulp-eslint": "^0.15.0",
     "gulp-plato": "^1.0.2",
+    "karma": "^0.12.31",
+    "karma-chrome-launcher": "0.1.0",
+    "karma-coverage": "^0.4.2",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-jasmine": "^0.1.0",
+    "karma-junit-reporter": "^0.2.2",
+    "karma-ng-html2js-preprocessor": "^0.1.2",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "phantomjs": "^1.9.17",
     "run-sequence": "^1.1.1"
   },
   "devDependencies": {
