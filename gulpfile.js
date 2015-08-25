@@ -79,6 +79,7 @@ gulp.task('lint', function () {
             },
             globals: {
                 'angular': true,
+                "_": true,
                 '$':true,
                 document: true,
                 window: true
@@ -107,6 +108,7 @@ gulp.task('lintTC', function () {
             globals: {
                 'jQuery':false,
                 'angular': true,
+                "_": true,
                 '$':true,
                 document: true,
                 window: true
@@ -154,7 +156,7 @@ gulp.task('watch', function() {
         [
             config.ui.js[0]
         ],
-        ['lint']
+        ['lint','compileSoft','templates']
     );
 
     gulp.watch(
